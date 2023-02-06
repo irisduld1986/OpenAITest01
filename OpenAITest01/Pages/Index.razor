@@ -1,0 +1,60 @@
+﻿@page "/"
+
+
+<div class="mdc-layout-grid__cell--span-12">
+    <h1 class="mdc-typography--headline5">Open AI Tests</h1>
+</div>
+
+<div class="mdc-layout-grid__cell--span-12">
+    <MBTextArea @bind-Value="@Question" Label="Question" style="width: 100%;" Rows="16" />
+</div>
+
+<div class="mdc-layout-grid__cell--span-2">
+    <MBNumericIntField @bind-Value="@MaxTokens" Label="Max Tokens" NumericFormat="N0" />
+</div>
+
+<div class="mdc-layout-grid__cell--span-4">
+    <MBSlider @bind-Value="@Temperature" ValueMin="0" ValueMax="1" DecimalPlaces="1" NumSteps="10" SliderType="@MBSliderType.DiscreteWithTickmarks" />
+</div>
+
+<div class="mdc-layout-grid__cell--span-6"></div>
+
+<div class="mdc-layout-grid__cell--span-12">
+    <MBButton @onclick="@ExecuteQuery" Label="Execute Query" />
+</div>
+
+@if (Response.Successful)
+{
+    <div class="mdc-layout-grid__cell--span-12" style="display: flex; flex-flow: row nowrap; align-items: center;">
+        <h2 class="mdc-typography--heading6" style="margin-right: 60px;">Response</h2>
+        <MBCircularProgress @ref="@CircularProgress" CircularProgressType="@ProgressType" />
+    </div>
+
+    if (Response.Choices != null)
+    {
+        <div class="mdc-layout-grid__cell--span-12">
+            <MBDataTable Items="@Response.Choices" Context="item" style="width: 100%;">
+                <TableHeader>
+                    <th class="mdc-data-table__header-cell mdc-data-table__header-cell--numeric header-bold" role="columnheader" scope="col">Index</th>
+                    <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Finish Reason</th>
+                    <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Answer</th>
+                </TableHeader>
+            
+                <TableRow>
+                    @{
+                        MarkupString text = (MarkupString)item.Text.Replace("\r\n", "<br />").Replace("\n", "<br />");
+                    }
+                    <td class="mdc-data-table__cell mdc-data-table__cell--numeric">@item.Index</td>
+                    <td class="mdc-data-table__cell">@item.FinishReason</td>
+                    <td class="mdc-data-table__cell">@text</td>
+                </TableRow>
+            </MBDataTable>
+        </div>
+    }
+}
+else
+{
+    <div class="mdc-layout-grid__cell--span-12">
+        <p class="mdc-typography--body1">@Response.Error.Code @Response.Error.Message</p>
+    </div>
+}
